@@ -7,6 +7,7 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Nullable>disable</Nullable>
         <Use_DalamudPackager>false</Use_DalamudPackager>
+        <Use_Dalamud_FFXIVClientStructs>false</Use_Dalamud_FFXIVClientStructs>
         <GenerateErrorForMissingTargetingPacks>false</GenerateErrorForMissingTargetingPacks>
         <CBTRepo>https://github.com/Jaksuhn/ffxiv-bundleoftweaks.git</CBTRepo>
         <SdkDir>$(MSBuildThisFileDirectory).sdk\</SdkDir>
@@ -20,6 +21,12 @@
             <Private>false</Private>
         </Reference>
         <Reference Include="$(SdkDir)clib.dll">
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="$(SdkDir)FFXIVClientStructs.dll">
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="$(SdkDir)InteropGenerator.Runtime.dll">
             <Private>false</Private>
         </Reference>
         <Analyzer Include="$(SdkDir)analyzers\InteropSourceGenerator.dll" />
