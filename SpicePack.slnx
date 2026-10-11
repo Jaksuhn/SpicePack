@@ -2,7 +2,7 @@
   <Configurations>
     <Platform Name="x64" />
   </Configurations>
-  <Project Path="SampleTweakPack/SampleTweakPack.csproj">
+  <Project Path="SpicePack/SpicePack.csproj">
     <Platform Project="x64" />
   </Project>
 </Solution>
