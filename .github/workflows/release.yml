@@ -1,0 +1,31 @@
+name: release
+
+on:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Download Dalamud
+        run: |
+          curl -fsSL -o latest.zip https://goatcorp.github.io/dalamud-distrib/latest.zip
+          mkdir -p "$HOME/.xlcore/dalamud/Hooks/dev"
+          unzip -qo latest.zip -d "$HOME/.xlcore/dalamud/Hooks/dev"
+      - name: Build
+        run: dotnet build SampleTweakPack/SampleTweakPack.csproj -c Release
+      - name: Upload tweaks.dll
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ github.run_number }}
+        run: |
+          gh release view "$VERSION" || gh release create "$VERSION" --title "$VERSION" --notes "Tweak pack $VERSION" --target "$GITHUB_SHA"
+          gh release upload "$VERSION" SampleTweakPack/bin/Release/tweaks.dll --clobber

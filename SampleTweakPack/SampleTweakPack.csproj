@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Dalamud.NET.Sdk/15.0.0">
+    <PropertyGroup>
+        <AssemblyName>tweaks</AssemblyName>
+        <RootNamespace>ComplexTweaks</RootNamespace>
+        <LangVersion>preview</LangVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Nullable>disable</Nullable>
+        <Use_DalamudPackager>false</Use_DalamudPackager>
+        <GenerateErrorForMissingTargetingPacks>false</GenerateErrorForMissingTargetingPacks>
+        <CBTRepo>https://github.com/Jaksuhn/ffxiv-bundleoftweaks.git</CBTRepo>
+        <SdkDir>$(MSBuildThisFileDirectory).sdk\</SdkDir>
+        <CbtUseCheckout Condition="Exists('$(MSBuildThisFileDirectory)..\..\ffxiv_bundledtweaks\ffxiv_bundledtweaks\Automaton.csproj')">true</CbtUseCheckout>
+        <CbtSrc Condition="'$(CbtUseCheckout)'=='true'">$(MSBuildThisFileDirectory)..\..\ffxiv_bundledtweaks</CbtSrc>
+        <CbtSrc Condition="'$(CbtSrc)'==''">$(MSBuildThisFileDirectory).cbt</CbtSrc>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Reference Include="$(SdkDir)Automaton.dll">
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="$(SdkDir)clib.dll">
+            <Private>false</Private>
+        </Reference>
+        <Analyzer Include="$(SdkDir)analyzers\InteropSourceGenerator.dll" />
+    </ItemGroup>
+
+    <Target Name="FetchCbtSdk" BeforeTargets="ResolveAssemblyReferences" Condition="'$(DesignTimeBuild)' != 'true'">
+        <Exec Command="git clone --depth 1 --recurse-submodules &quot;$(CBTRepo)&quot; &quot;$(CbtSrc)&quot;"
+              Condition="'$(CbtUseCheckout)' != 'true' AND !Exists('$(CbtSrc)\ffxiv_bundledtweaks\Automaton.csproj')" />
+        <Exec Command="git -C &quot;$(CbtSrc)&quot; pull --ff-only --recurse-submodules"
+              Condition="'$(CbtUseCheckout)' != 'true' AND Exists('$(CbtSrc)\.git')" />
+        <Exec Command="dotnet build &quot;$(CbtSrc)\ffxiv_bundledtweaks\Automaton.csproj&quot; -c $(Configuration) --nologo" />
+        <PropertyGroup>
+            <_SdkZip>$(CbtSrc)\ffxiv_bundledtweaks\bin\$(Configuration)\sdk.zip</_SdkZip>
+        </PropertyGroup>
+        <Error Condition="!Exists('$(_SdkZip)')" Text="CBT build did not produce sdk.zip." />
+        <Unzip SourceFiles="$(_SdkZip)" DestinationFolder="$(SdkDir)" />
+    </Target>
+</Project>
