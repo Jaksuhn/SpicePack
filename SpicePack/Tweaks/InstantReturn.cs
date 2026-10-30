@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace ComplexTweaks.Tweaks;
 
-public partial class InstantReturn : Tweak {
+public class InstantReturnConfiguration {
+    [BoolConfig] public bool LeaveParty = true;
+}
+
+public partial class InstantReturn : Tweak<InstantReturnConfiguration> {
     public override string Name => "Quick Return";
     public override string Description => "Bypass return's cast and recast time.";
 
@@ -19,7 +23,7 @@ public partial class InstantReturn : Tweak {
             AgentReturn_ReturnHook.Original(agent);
 
         // there's some condition that party disbanding requires but can't find it so we're retrying
-        Svc.Automation.Start(new Return());
+        Svc.Automation.Start(new Return(Config.LeaveParty));
     }
 
     private unsafe void HandleReturn(AddonEvent type, AddonArgs args) {
@@ -29,11 +33,11 @@ public partial class InstantReturn : Tweak {
         args.ReceiveEvent(AtkEventType.ButtonClick, 0);
     }
 
-    private sealed class Return : TaskBase {
+    private sealed class Return(bool leaveParty) : TaskBase {
         private static unsafe bool Disband() => InfoProxyPartyMember.Instance()->DisbandParty();
         private static unsafe bool Leave() => InfoProxyPartyMember.Instance()->LeaveParty();
         protected override async Task Execute() {
-            if (InfoProxyCrossRealm.IsLocalPlayerInParty()) {
+            if (leaveParty && InfoProxyCrossRealm.IsLocalPlayerInParty()) {
                 if (InfoProxyCrossRealm.IsLocalPlayerPartyLeader())
                     await WaitUntil(Disband, "WaitForDisband");
                 else
